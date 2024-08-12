@@ -1,1 +1,0 @@
-export const useCounter = ()=>useState("count", () => Math.floor(Math.random() * 100))
