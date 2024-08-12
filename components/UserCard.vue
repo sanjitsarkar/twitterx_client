@@ -15,7 +15,7 @@
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded-sm text-xs"
           >
             {{
-              isFollowing ? "Unfollow" : isFollower ? "Follow Back" : "Follow"
+              isFollower ? "Unfollow" : isFollowing ? "Follow Back" : "Follow"
             }}
           </button>
         </div>
@@ -34,13 +34,12 @@ const props = defineProps(["user"]);
 const { firstName, lastName, created_at, isFollower, isFollowing, id } = toRefs(
   props.user
 );
+
 const handleFollow = () => {
-  if (isFollowing) {
-    // Unfollow user
-    store.dispatch("follow/followUser", id.value);
-  } else {
+  if (isFollower.value) {
     store.dispatch("follow/unfollowUser", id.value);
-    // Follow user
+  } else {
+    store.dispatch("follow/followUser", id.value);
   }
 };
 </script>

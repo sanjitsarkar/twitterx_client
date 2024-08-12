@@ -16,7 +16,7 @@
           </div>
         </div>
         <div class="text-gray-500 text-sm">
-          Posted {{ datePostedAgo(new Date(created_at)) }} ago
+          Posted {{ datePostedAgo(new Date(created_at)) }}
         </div>
       </div>
     </div>

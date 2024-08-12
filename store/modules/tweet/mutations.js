@@ -3,7 +3,7 @@ export default {
     state.tweets = tweets
   },
   ADD_TWEET(state, tweet) {
-    state.tweets.push(tweet)
+    state.tweets.unshift(tweet)
   },
   UPDATE_TWEET(state, updatedTweet) {
     const index = state.tweets.findIndex(tweet => tweet.id === updatedTweet.id)
@@ -19,5 +19,8 @@ export default {
   },
   SET_ERROR(state, error) {
     state.error = error
+  },
+  RESET_TWEETS(state) {
+    state.tweets = [];
   },
 }

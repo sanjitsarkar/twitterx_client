@@ -1,6 +1,9 @@
+import { isAuthenticated } from "~/utils/common.utils";
+
 export default defineNuxtRouteMiddleware((to, from) => {
-  const isAuthenticated = !!localStorage.getItem("token");
-  if (!isAuthenticated) {
-    return navigateTo("/login")
+  if (process.client) {
+    if (!isAuthenticated) {
+      return navigateTo("/login")
+    }
   }
 })

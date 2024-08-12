@@ -26,7 +26,7 @@
               autocomplete="given-name"
               required="true"
               v-model="credentials.firstName"
-              class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -45,7 +45,7 @@
               autocomplete="family-name"
               required="true"
               v-model="credentials.lastName"
-              class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -63,7 +63,7 @@
               autocomplete="email"
               required="true"
               v-model="credentials.email"
-              class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -84,7 +84,7 @@
               autocomplete="current-password"
               required="true"
               v-model="credentials.password"
-              class="block w-full p-2 text-center rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              class="block w-full px-2 py-1.5 rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -104,7 +104,7 @@
               autocomplete="current-password"
               required="true"
               v-model="credentials.confirmPassword"
-              class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -133,6 +133,8 @@
 
 <script setup>
 import { useStore } from "vuex";
+import { useRouter } from "vue-router";
+import { isAuthenticated } from "~/utils/common.utils";
 const router = useRouter();
 const store = useStore();
 const credentials = reactive({
@@ -144,12 +146,34 @@ const credentials = reactive({
 });
 const user = computed(() => store.state.user.user);
 const error = computed(() => store.state.user.error);
+
+watch(isAuthenticated, (isAuthenticatedNew) => {
+  if (isAuthenticatedNew) {
+    router.push("/");
+  }
+});
 watch(error, (errorNew) => {
   if (errorNew) {
   }
 });
 const registerUser = () => {
   const { firstName, confirmPassword, email, lastName, password } = credentials;
+  if (password !== confirmPassword) {
+    useNuxtApp().$toast.error("Passwords do not match");
+    return;
+  }
+  if (!firstName) {
+    useNuxtApp().$toast.error("First name is required");
+    return;
+  }
+  if (!lastName) {
+    useNuxtApp().$toast.error("Last name is required");
+    return;
+  }
+  if (!email) {
+    useNuxtApp().$toast.error("Email is required");
+    return;
+  }
   store.dispatch("user/register", { firstName, lastName, email, password });
 };
 

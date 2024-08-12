@@ -1,11 +1,19 @@
+import Cookies from 'universal-cookie';
+import { apiBase } from '~/utils/common.utils';
+const cookies = new Cookies();
+
 export default {
-  async fetchUsers({ commit }, { searchKey, orderBy, page }) {
+  async fetchUsers({ commit }, params) {
+    const { searchKey, orderBy, page } = params || {}
+    commit('RESET_USERS');
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
+
     try {
-      const data = await $fetch('http://localhost:8080/api/users', {
+      const token = cookies.get('token');
+      const data = await $fetch(`${apiBase}/users`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${token}`
         },
         query: {
           searchKey,
@@ -17,6 +25,7 @@ export default {
     } catch (error) {
       commit('SET_ERROR', 'Error fetching users')
       console.error('Error fetching users:', error)
+      useNuxtApp().$toast.error(error.message);
     } finally {
       commit('SET_LOADING', false)
     }
@@ -25,35 +34,59 @@ export default {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
-      const data = await $fetch('http://localhost:8080/api/users/profile', {
+      const token = cookies.get('token');
+      const data = await $fetch(`${apiBase}/users/profile`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${token}`
         }
       })
       commit('SET_USER', data)
     } catch (error) {
       commit('SET_ERROR', 'Error fetching profile')
       console.error('Error fetching profile:', error)
+      useNuxtApp().$toast.error("Error fetching profile");
+
     } finally {
       commit('SET_LOADING', false)
     }
   },
-
+  async fetchUserProfile({ commit }, userId) {
+    commit('SET_LOADING', true)
+    commit('SET_ERROR', null)
+    try {
+      const token = cookies.get('token');
+      const data = await $fetch(`${apiBase}/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      commit('SET_USER_PROFILE', data)
+    } catch (error) {
+      commit('SET_ERROR', 'Error fetching user profile')
+      console.error('Error fetching user profile:', error)
+      useNuxtApp().$toast.error("Error fetching user profile");
+    } finally {
+      commit('SET_LOADING', false)
+    }
+  },
   async updateProfile({ commit }, userProfile) {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
-      const data = await $fetch('/api/profile', {
+      const token = cookies.get('token');
+      const data = await $fetch(`${apiBase}/api/profile`, {
         method: 'PUT',
         body: userProfile,
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${token}`
         }
       })
       commit('SET_USER', data.user)
+      useNuxtApp().$toast.info('Profile updated successfully');
     } catch (error) {
       commit('SET_ERROR', error.message)
       console.error('Error updating profile:', error)
+      useNuxtApp().$toast.error("Error updating profile");
     } finally {
       commit('SET_LOADING', false)
     }
@@ -63,18 +96,21 @@ export default {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
-      const data = await $fetch('http://localhost:8080/api/users/login', {
+      const data = await $fetch(`${apiBase}/users/login`, {
         method: 'POST',
         body: credentials,
 
       })
       commit('SET_USER', data.user)
       commit('SET_TOKEN', data.token)
-      localStorage.setItem('token', data.token)
-      // You may need to handle setting the token for subsequent requests here
+      useNuxtApp().$toast.info(`Welcome back, ${data.user.firstName}`);
+      cookies.set('token', data.token, { path: '/', secure: true, sameSite: 'strict' }); // Store token in cookies
+      useNuxtApp().$router.push('/');
     } catch (error) {
       commit('SET_ERROR', error.message)
       console.error('Error logging in:', error)
+
+      useNuxtApp().$toast.error("Invalid email or password");
     } finally {
       commit('SET_LOADING', false)
     }
@@ -84,14 +120,16 @@ export default {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
-      await $fetch('http://localhost:8080/api/users/register', {
+      await $fetch(`${apiBase}/users/register`, {
         method: 'POST',
         body: userDetails,
       })
-
+      useNuxtApp().$toast.info(`You have successfully registered, ${userDetails.firstName}, please login`);
+      useNuxtApp().$router.push('/login');
     } catch (error) {
       commit('SET_ERROR', error.message)
       console.error('Error registering:', error)
+      useNuxtApp().$toast.error("Error registering user");
     } finally {
       commit('SET_LOADING', false)
     }
@@ -99,6 +137,11 @@ export default {
   logout({ commit }) {
     commit('SET_USER', null)
     commit('SET_TOKEN', null)
-    localStorage.removeItem('token')
-  }
+    useNuxtApp().$toast.info(`Bye, see you soon 😊`);
+    cookies.remove('token', { path: '/' });
+    useNuxtApp().$router.push('/login');
+  },
+  resetUsers({ commit }) {
+    commit('RESET_USERS');
+  },
 }

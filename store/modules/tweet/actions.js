@@ -1,11 +1,18 @@
+import Cookies from 'universal-cookie';
+import { apiBase } from '~/utils/common.utils';
+
+const cookies = new Cookies();
+
 export default {
-  async fetchTweets({ commit }, { searchKey, orderBy, page }) {
+  async fetchTweets({ commit }, params) {
+    const { searchKey, orderBy, page } = params || {}
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
-      const data = await $fetch('http://localhost:8080/api/tweets', {
+      const token = cookies.get('token'); // Get token from cookies
+      const data = await $fetch(`${apiBase}/tweets`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${token}`
         },
         query: {
           searchKey,
@@ -17,6 +24,7 @@ export default {
     } catch (error) {
       commit('SET_ERROR', 'Error fetching tweets')
       console.error('Error fetching tweets:', error)
+      useNuxtApp().$toast.error("Error fetching tweets");
     } finally {
       commit('SET_LOADING', false)
     }
@@ -26,14 +34,20 @@ export default {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
-      const data = await $fetch('http://localhost:8080/api/tweets', {
+      const token = cookies.get('token'); // Get token from cookies
+      const data = await $fetch(`${apiBase}/tweets`, {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
         body: tweet,
       })
       commit('ADD_TWEET', data)
+      useNuxtApp().$toast.success('Tweet created successfully');
     } catch (error) {
       commit('SET_ERROR', 'Error creating tweet')
       console.error('Error creating tweet:', error)
+      useNuxtApp().$toast.error("Error creating tweet");
     } finally {
       commit('SET_LOADING', false)
     }
@@ -43,14 +57,20 @@ export default {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
-      const data = await $fetch(`http://localhost:8080/api/tweets/${tweet.id}`, {
+      const token = cookies.get('token');
+      const data = await $fetch(`${apiBase}/tweets/${tweet.id}`, {
         method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
         body: tweet,
       })
       commit('UPDATE_TWEET', data)
+      useNuxtApp().$toast.success('Tweet updated successfully');
     } catch (error) {
       commit('SET_ERROR', 'Error updating tweet')
       console.error('Error updating tweet:', error)
+      useNuxtApp().$toast.error("Error updating tweet");
     } finally {
       commit('SET_LOADING', false)
     }
@@ -60,13 +80,19 @@ export default {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
-      await $fetch(`http://localhost:8080/api/tweets/${tweetId}`, {
+      const token = cookies.get('token');
+      await $fetch(`${apiBase}/tweets/${tweetId}`, {
         method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
       })
       commit('DELETE_TWEET', tweetId)
+      useNuxtApp().$toast.info('Tweet deleted successfully');
     } catch (error) {
       commit('SET_ERROR', 'Error deleting tweet')
       console.error('Error deleting tweet:', error)
+      useNuxtApp().$toast.error("Error deleting tweet");
     } finally {
       commit('SET_LOADING', false)
     }
@@ -76,13 +102,23 @@ export default {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
-      const data = await $fetch(`http://localhost:8080/api/users/${userId}/tweets`)
+      const token = cookies.get('token');
+      const data = await $fetch(`${apiBase}/users/${userId}/tweets`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+      })
       commit('SET_TWEETS', data)
     } catch (error) {
       commit('SET_ERROR', 'Error fetching user tweets')
       console.error('Error fetching user tweets:', error)
+      useNuxtApp().$toast.error("Error fetching user tweets");
     } finally {
       commit('SET_LOADING', false)
     }
-  }
+  },
+
+  resetTweets({ commit }) {
+    commit('RESET_TWEETS');
+  },
 }

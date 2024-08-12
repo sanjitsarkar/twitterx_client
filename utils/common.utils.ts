@@ -1,11 +1,7 @@
-export function debounce(func: Function, delay: number) {
-  let timeoutId: NodeJS.Timeout;
+import Cookies from "universal-cookie";
+const cookies = new Cookies();
 
-  return function (...args: any[]) {
-    clearTimeout(timeoutId);
+export const token = cookies.get("token");
+export const isAuthenticated = !!token;
+export const apiBase = process.env.NUXT_PUBLIC_API_BASE || "http://localhost:8080/api";
 
-    timeoutId = setTimeout(() => {
-      func.apply(this, args);
-    }, delay);
-  };
-}

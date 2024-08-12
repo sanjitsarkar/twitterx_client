@@ -1,4 +1,3 @@
-// store/tweets.js
 
 export const state = () => ({
   tweets: [],

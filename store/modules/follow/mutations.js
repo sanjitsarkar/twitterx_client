@@ -5,16 +5,22 @@ export default {
   SET_ERROR(state, error) {
     state.error = error
   },
+  ADD_FOLLOWING(state, user) {
+    state.following.unshift(user)
+  },
+  REMOVE_FOLLOWING(state, userId) {
+    state.following = state.following.filter(user => user.id !== userId)
+  },
   SET_FOLLOWERS(state, followers) {
     state.followers = followers
   },
   SET_FOLLOWING(state, following) {
     state.following = following
   },
-  ADD_FOLLOWING(state, user) {
-    state.following.push(user)
+  RESET_FOLLOWERS(state) {
+    state.followers = [];
   },
-  REMOVE_FOLLOWING(state, userId) {
-    state.following = state.following.filter(user => user.id !== userId)
+  RESET_FOLLOWINGS(state) {
+    state.following = [];
   },
 }

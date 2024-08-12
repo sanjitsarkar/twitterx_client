@@ -5,20 +5,22 @@
       aria-label="Global"
     >
       <div class="flex lg:flex-1">
-        <NuxtLink href="/" class="-m-1.5 p-1.5">
+        <NuxtLink to="/" class="-m-1.5 p-1.5">
           <span>TwitterX</span>
         </NuxtLink>
       </div>
 
-      <div v-if="!isAuthenticated" class="lg:flex lg:flex-1 lg:justify-end">
-        <span> {{ userInfo?.firstName }} {{ userInfo?.lastName }} </span>
+      <div v-if="!userInfo" class="lg:flex lg:flex-1 lg:justify-end">
         <NuxtLink
           href="/login"
           class="text-sm font-semibold leading-6 text-gray-900"
           >Log in <span aria-hidden="true">&rarr;</span></NuxtLink
         >
       </div>
-      <div v-else class="lg:flex lg:flex-1 lg:justify-end">
+      <div v-else class="flex justify-end gap-2 items-center">
+        <NuxtLink :to="`/user/${userInfo?.id}`">
+          {{ userInfo?.firstName }} {{ userInfo?.lastName }}
+        </NuxtLink>
         <button
           @click="logout"
           class="text-sm font-semibold leading-6 text-gray-900"
@@ -32,22 +34,27 @@
 
 <script setup>
 import { useStore } from "vuex";
+import { useRouter } from "vue-router";
+import { isAuthenticated } from "~/utils/common.utils";
 const store = useStore();
 const router = useRouter();
-const isAuthenticated = computed(() => store.getters["user/isAuthenticated"]);
 const userInfo = computed(() => store.state.user.user);
 watch(isAuthenticated, (value) => {
   if (!value) {
     router.push("/login");
   }
 });
+
 const logout = () => {
   store.dispatch("user/logout");
+  router.push("/login");
 };
 
 onMounted(() => {
-  if (isAuthenticated.value) {
+  if (isAuthenticated) {
     store.dispatch("user/fetchProfile");
+  } else {
+    router.push("/login");
   }
 });
 </script>

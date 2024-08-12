@@ -13,5 +13,20 @@ export default {
   },
   SET_USERS(state, users) {
     state.users = users
-  }
+  },
+
+  UPDATE_USER_FOLLOWER(state, { userId, isFollower }) {
+    const user = state.users.find(user => user.id === userId)
+    if (user) {
+      user["isFollower"] = isFollower,
+        user["followingCount"] = isFollower ? user["followingCount"] + 1 : user["followingCount"] - 1
+    }
+  },
+  SET_USER_PROFILE(state, userProfile) {
+    state.userProfile = userProfile
+  },
+  RESET_USERS(state) {
+    state.users = [];
+  },
 }
+

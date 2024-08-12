@@ -26,7 +26,7 @@
               autocomplete="email"
               v-model="credentials.email"
               required="true"
-              class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -38,13 +38,6 @@
               class="block text-sm font-medium leading-6 text-gray-900"
               >Password</label
             >
-            <div class="text-sm">
-              <NuxtLink
-                to="/forgot-password"
-                class="font-semibold text-indigo-600 hover:text-indigo-500"
-                >Forgot password?</NuxtLink
-              >
-            </div>
           </div>
           <div class="mt-2">
             <input
@@ -54,7 +47,7 @@
               v-model="credentials.password"
               autocomplete="current-password"
               required="true"
-              class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -83,26 +76,22 @@
 
 <script setup>
 import { useStore } from "vuex";
-const router = useRouter();
+
 const store = useStore();
 const credentials = reactive({
   email: "",
   password: "",
 });
-const error = computed(() => store.state.user.error);
-const isAuthenticated = computed(() => store.getters["user/isAuthenticated"]);
 
-watch(error, (errorNew) => {
-  if (errorNew) {
-  }
-});
 const loginUser = () => {
+  if (!credentials.email) {
+    useNuxtApp().$toast.error("Email is required");
+    return;
+  }
+  if (!credentials.password) {
+    useNuxtApp().$toast.error("Password is required");
+    return;
+  }
   store.dispatch("user/login", credentials);
 };
-
-watch(isAuthenticated, (isAuthenticatedNew) => {
-  if (isAuthenticatedNew) {
-    router.push("/");
-  }
-});
 </script>
