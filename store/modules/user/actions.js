@@ -1,5 +1,7 @@
 import Cookies from 'universal-cookie';
-import { apiBase } from '~/utils/common.utils';
+import { useRuntimeConfig } from '#app';
+
+
 const cookies = new Cookies();
 
 export default {
@@ -11,6 +13,9 @@ export default {
 
     try {
       const token = cookies.get('token');
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       const data = await $fetch(`${apiBase}/users`, {
         headers: {
           Authorization: `Bearer ${token}`
@@ -35,6 +40,9 @@ export default {
     commit('SET_ERROR', null)
     try {
       const token = cookies.get('token');
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       const data = await $fetch(`${apiBase}/users/profile`, {
         headers: {
           Authorization: `Bearer ${token}`
@@ -55,6 +63,9 @@ export default {
     commit('SET_ERROR', null)
     try {
       const token = cookies.get('token');
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       const data = await $fetch(`${apiBase}/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`
@@ -74,6 +85,9 @@ export default {
     commit('SET_ERROR', null)
     try {
       const token = cookies.get('token');
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       const data = await $fetch(`${apiBase}/api/profile`, {
         method: 'PUT',
         body: userProfile,
@@ -96,6 +110,9 @@ export default {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       const data = await $fetch(`${apiBase}/users/login`, {
         method: 'POST',
         body: credentials,
@@ -120,6 +137,9 @@ export default {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       await $fetch(`${apiBase}/users/register`, {
         method: 'POST',
         body: userDetails,

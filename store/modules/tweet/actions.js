@@ -1,5 +1,6 @@
 import Cookies from 'universal-cookie';
-import { apiBase } from '~/utils/common.utils';
+import { useRuntimeConfig } from '#app';
+
 
 const cookies = new Cookies();
 
@@ -9,7 +10,10 @@ export default {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
-      const token = cookies.get('token'); // Get token from cookies
+      const token = cookies.get('token');
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       const data = await $fetch(`${apiBase}/tweets`, {
         headers: {
           Authorization: `Bearer ${token}`
@@ -34,7 +38,10 @@ export default {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
-      const token = cookies.get('token'); // Get token from cookies
+      const token = cookies.get('token');
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       const data = await $fetch(`${apiBase}/tweets`, {
         method: 'POST',
         headers: {
@@ -58,6 +65,9 @@ export default {
     commit('SET_ERROR', null)
     try {
       const token = cookies.get('token');
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       const data = await $fetch(`${apiBase}/tweets/${tweet.id}`, {
         method: 'PATCH',
         headers: {
@@ -81,6 +91,9 @@ export default {
     commit('SET_ERROR', null)
     try {
       const token = cookies.get('token');
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       await $fetch(`${apiBase}/tweets/${tweetId}`, {
         method: 'DELETE',
         headers: {
@@ -103,6 +116,9 @@ export default {
     commit('SET_ERROR', null)
     try {
       const token = cookies.get('token');
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       const data = await $fetch(`${apiBase}/users/${userId}/tweets`, {
         headers: {
           Authorization: `Bearer ${token}`

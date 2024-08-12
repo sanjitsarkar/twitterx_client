@@ -1,5 +1,5 @@
 import Cookies from 'universal-cookie';
-import { apiBase } from '~/utils/common.utils';
+import { useRuntimeConfig } from '#app';
 
 const cookies = new Cookies();
 
@@ -9,6 +9,9 @@ export default {
     commit('SET_ERROR', null)
     try {
       const token = cookies.get('token');
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       const data = await $fetch(`${apiBase}/follow/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`
@@ -17,7 +20,7 @@ export default {
       })
       commit('ADD_FOLLOWING', data.user)
       commit('user/UPDATE_USER_FOLLOWER', { userId, isFollower: true }, { root: true })
-      useNuxtApp().$toast.info(`You are now following ${data.user.name}`);
+      useNuxtApp().$toast.info(`You are now following the user`);
     } catch (error) {
       commit('SET_ERROR', 'Error following user')
       console.error('Error following user:', error)
@@ -32,6 +35,9 @@ export default {
     commit('SET_ERROR', null)
     try {
       const token = cookies.get('token');
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       await $fetch(`${apiBase}/follow/unfollow/${userId}`, {
         method: 'DELETE',
         headers: {
@@ -56,6 +62,9 @@ export default {
     commit('SET_ERROR', null)
     try {
       const token = cookies.get('token');
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       const data = await $fetch(`${apiBase}/follow/followers/${userId}`, {
         query: {
           searchKey,
@@ -82,6 +91,9 @@ export default {
     try {
       const { userId, searchKey, sortOrder, page } = params || {}
       const token = cookies.get('token');
+      const config = useRuntimeConfig();
+      const apiBase = config.public.apiBase;
+
       const data = await $fetch(`${apiBase}/follow/following/${userId}`, {
         query: {
           searchKey,
