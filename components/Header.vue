@@ -33,28 +33,29 @@
 </template>
 
 <script setup>
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
-import { isAuthenticated } from "~/utils/common.utils";
-const store = useStore();
+import { useUserStore } from "~/stores/user";
+import useToken from "~/composables/useToken";
+import { storeToRefs } from "pinia";
+
+const store = useUserStore();
 const router = useRouter();
-const userInfo = computed(() => store.state.user.user);
-watch(isAuthenticated, (value) => {
-  if (!value) {
-    router.push("/login");
-  }
-});
+const { user: userInfo } = storeToRefs(store);
+const { token } = useToken();
+
+const isAuthenticated = computed(() => !!token);
 
 const logout = () => {
-  store.dispatch("user/logout");
+  store.logout();
   router.push("/login");
 };
 
-onMounted(() => {
-  if (isAuthenticated) {
-    store.dispatch("user/fetchProfile");
+const fetchProfile = async () => {
+  if (isAuthenticated.value) {
+    await useAsyncData("profile", () => store.fetchProfile());
   } else {
     router.push("/login");
   }
-});
+};
+
+fetchProfile();
 </script>

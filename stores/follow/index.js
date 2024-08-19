@@ -1,15 +1,13 @@
+import { defineStore } from 'pinia'
 import state from "./state"
 import actions from "./actions"
-import mutations from "./mutations"
 import getters from "./getters"
 
-export const follow = {
-  namespaced: true,
+export const useFollowStore = defineStore('follow', {
   state,
   getters,
-  mutations,
   actions
-}
+});
 
 
 

@@ -4,4 +4,5 @@ export default () => ({
   error: null,
   followers: [],
   following: [],
+  searchFilter: null,
 })

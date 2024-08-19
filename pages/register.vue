@@ -23,9 +23,7 @@
               id="firstName"
               name="firstName"
               type="text"
-              autocomplete="given-name"
-              required="true"
-              v-model="credentials.firstName"
+              v-model="firstName"
               class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
@@ -42,13 +40,12 @@
               id="lastName"
               name="lastName"
               type="text"
-              autocomplete="family-name"
-              required="true"
-              v-model="credentials.lastName"
+              v-model="lastName"
               class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
+
         <div>
           <label
             for="email"
@@ -60,9 +57,7 @@
               id="email"
               name="email"
               type="email"
-              autocomplete="email"
-              required="true"
-              v-model="credentials.email"
+              v-model="email"
               class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
@@ -81,13 +76,12 @@
               id="password"
               name="password"
               type="password"
-              autocomplete="current-password"
-              required="true"
-              v-model="credentials.password"
+              v-model="password"
               class="block w-full px-2 py-1.5 rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
+
         <div>
           <div class="flex items-center justify-between">
             <label
@@ -101,13 +95,12 @@
               id="confirmPassword"
               name="confirmPassword"
               type="password"
-              autocomplete="current-password"
-              required="true"
-              v-model="credentials.confirmPassword"
+              v-model="confirmPassword"
               class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
+
         <div>
           <button
             type="submit"
@@ -115,7 +108,7 @@
             class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
             <span v-if="isLoading">Loading...</span>
-            <span v-else> Sign up</span>
+            <span v-else>Sign up</span>
           </button>
         </div>
       </form>
@@ -133,55 +126,48 @@
 </template>
 
 <script setup>
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
-import { isAuthenticated } from "~/utils/common.utils";
-const router = useRouter();
-const store = useStore();
-const credentials = reactive({
-  email: "",
-  password: "",
-  confirmPassword: "",
-  firstName: "",
-  lastName: "",
-});
-const user = computed(() => store.state.user.user);
-const error = computed(() => store.state.user.error);
-const isLoading = computed(() => store.state.user.loading);
+import { useUserStore } from "~/stores/user";
+import { storeToRefs } from "pinia";
+import { useForm, useField } from "vee-validate";
+import * as yup from "yup";
 
-watch(isAuthenticated, (isAuthenticatedNew) => {
-  if (isAuthenticatedNew) {
-    router.push("/");
-  }
-});
-watch(error, (errorNew) => {
-  if (errorNew) {
-  }
-});
-const registerUser = () => {
-  const { firstName, confirmPassword, email, lastName, password } = credentials;
-  if (password !== confirmPassword) {
-    useNuxtApp().$toast.error("Passwords do not match");
-    return;
-  }
-  if (!firstName) {
-    useNuxtApp().$toast.error("First name is required");
-    return;
-  }
-  if (!lastName) {
-    useNuxtApp().$toast.error("Last name is required");
-    return;
-  }
-  if (!email) {
-    useNuxtApp().$toast.error("Email is required");
-    return;
-  }
-  store.dispatch("user/register", { firstName, lastName, email, password });
-};
+const store = useUserStore();
+const toast = useNuxtApp().$toast;
+const { loading: isLoading } = storeToRefs(store);
 
-watch(user, (newUser) => {
-  if (newUser) {
-    router.push("/login");
-  }
+const schema = yup.object({
+  firstName: yup.string().required("First name is required"),
+  lastName: yup.string().required("Last name is required"),
+  email: yup
+    .string()
+    .email("Must be a valid email")
+    .required("Email is required"),
+  password: yup
+    .string()
+    .min(6, "Password must be at least 6 characters long")
+    .required("Password is required"),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref("password"), null], "Passwords must match")
+    .required("Confirm password is required"),
+});
+
+const { handleSubmit, resetForm, errors } = useForm({
+  validationSchema: schema,
+});
+
+const { value: firstName } = useField("firstName");
+const { value: lastName } = useField("lastName");
+const { value: email } = useField("email");
+const { value: password } = useField("password");
+const { value: confirmPassword } = useField("confirmPassword");
+
+if (errors.value && errors.value.length > 0) {
+  toast.error(errors[0]);
+}
+
+const registerUser = handleSubmit(async (values) => {
+  await useAsyncData("register", () => store.registerUser(values));
+  resetForm();
 });
 </script>

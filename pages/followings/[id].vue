@@ -6,6 +6,7 @@
     >
       <input
         v-model="searchKey"
+        @input="onSearchKeyChange"
         type="text"
         class="border border-gray-300 rounded-md px-4 py-2 w-full md:w-1/2 lg:w-1/3 h-auto"
         placeholder="Search followings..."
@@ -41,47 +42,39 @@
             <p class="text-gray-600">{{ following.following?.email }}</p>
           </li>
         </ul>
-        <div ref="sentinel" class="h-1"></div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useStore } from "vuex";
-import { useRoute } from "vue-router";
-import { ref, computed, watch } from "vue";
+import { useFollowStore } from "~/stores/follow";
+import { storeToRefs } from "pinia";
 
-const store = useStore();
+const store = useFollowStore();
 const route = useRoute();
-const followings = computed(() => store.state.follow.following);
-const isLoading = computed(() => store.state.follow.loading);
+
+const { following: followings, loading: isLoading } = storeToRefs(store);
 const sortOrder = ref("latest");
 const searchKey = ref("");
-const userId = computed(() => route.params?.id);
 
-definePageMeta({
-  middleware: "auth",
-});
+const getFollowings = (params) => {
+  let { searchKey, sortOrder } = params;
+  searchKey = searchKey.value;
+  sortOrder = sortOrder.value;
+  store.getFollowings({ searchKey, sortOrder, userId: route.params.id });
+};
 
 const toggleSortOrder = () => {
   sortOrder.value = sortOrder.value === "latest" ? "oldest" : "latest";
+  getFollowings({ searchKey, sortOrder });
 };
 
-watch(
-  [searchKey, sortOrder],
-  ([searchKeyNew, sortOrderNew]) => {
-    store.dispatch("follow/getFollowings", {
-      searchKey: searchKeyNew,
-      sortOrder: sortOrderNew,
-      userId: userId.value,
-    });
-  },
-  {
-    immediate: true,
-    deep: true,
-  }
-);
+const onSearchKeyChange = (event) => {
+  getFollowings({ searchKey: event.target, sortOrder });
+};
+
+getFollowings({ searchKey, sortOrder });
 </script>
 
 <style scoped>

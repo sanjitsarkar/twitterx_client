@@ -6,7 +6,7 @@
       >
         <div class="flex items-center gap-2">
           <p class="text-gray-700 text-base overflow-ellipsis overflow-hidden">
-            <NuxtLink :to="`/user/${user?.id}`"
+            <NuxtLink :to="`/user/${id}`"
               >{{ firstName }} {{ lastName }}</NuxtLink
             >
           </p>
@@ -19,27 +19,45 @@
             }}
           </button>
         </div>
-        <div class="text-gray-500 text-sm mt-2">
-          Joined {{ datePostedAgo(new Date(created_at)) }} ago
-        </div>
+        <div class="text-gray-500 text-sm mt-2">Joined {{ postedAgo }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useStore } from "vuex";
-const store = useStore();
-const props = defineProps(["user"]);
-const { firstName, lastName, created_at, isFollower, isFollowing, id } = toRefs(
-  props.user
-);
+import { useFollowStore } from "~/stores/follow";
+import { useUserStore } from "~/stores/user";
 
-const handleFollow = () => {
-  if (isFollower.value) {
-    store.dispatch("follow/unfollowUser", id.value);
+const followStore = useFollowStore();
+const userStore = useUserStore();
+
+const { user } = defineProps({
+  user: {
+    type: {
+      firstName: String,
+      lastName: String,
+      created_at: String,
+      isFollower: Boolean,
+      isFollowing: Boolean,
+      id: String,
+    },
+    required: true,
+  },
+});
+
+const { id, firstName, lastName, created_at, isFollower, isFollowing } = user;
+
+const postedAgo = computed(() => {
+  return datePostedAgo(new Date(created_at));
+});
+
+const handleFollow = async () => {
+  if (isFollower) {
+    await followStore.unfollowUser(id);
   } else {
-    store.dispatch("follow/followUser", id.value);
+    await followStore.followUser(id);
   }
+  await userStore.fetchUsers();
 };
 </script>

@@ -31,18 +31,12 @@
 </template>
 
 <script setup>
-import { useStore } from "vuex";
+import { useUserStore } from "~/stores/user";
+import { storeToRefs } from "pinia";
 
 const route = useRoute();
-const store = useStore();
-const userProfile = computed(() => store.state.user.userProfile);
+const store = useUserStore();
+const { userProfile } = storeToRefs(store);
 
-definePageMeta({
-  middleware: "auth",
-});
-
-onMounted(async () => {
-  const userId = route.params.id;
-  store.dispatch("user/fetchUserProfile", userId);
-});
+store.fetchUserProfile(route.params.id);
 </script>

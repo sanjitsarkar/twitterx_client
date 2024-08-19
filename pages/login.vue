@@ -24,7 +24,7 @@
               name="email"
               type="email"
               autocomplete="email"
-              v-model="credentials.email"
+              v-model="email"
               required="true"
               class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
@@ -44,7 +44,7 @@
               id="password"
               name="password"
               type="password"
-              v-model="credentials.password"
+              v-model="password"
               autocomplete="current-password"
               required="true"
               class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -77,24 +77,36 @@
 </template>
 
 <script setup>
-import { useStore } from "vuex";
+import { useUserStore } from "~/stores/user";
+import { storeToRefs } from "pinia";
+import { useForm, useField } from "vee-validate";
+import * as yup from "yup";
 
-const store = useStore();
-const isLoading = computed(() => store.state.user.loading);
-const credentials = reactive({
-  email: "",
-  password: "",
+const store = useUserStore();
+const toast = useNuxtApp().$toast;
+const { loading: isLoading } = storeToRefs(store);
+
+const schema = yup.object({
+  email: yup.string().required("Email is required"),
+  password: yup
+    .string()
+    .min(5, "Password must be at least 6 characters long")
+    .required("Password is required"),
 });
 
-const loginUser = () => {
-  if (!credentials.email) {
-    useNuxtApp().$toast.error("Email is required");
-    return;
-  }
-  if (!credentials.password) {
-    useNuxtApp().$toast.error("Password is required");
-    return;
-  }
-  store.dispatch("user/login", credentials);
-};
+const { handleSubmit, errors, resetForm } = useForm({
+  validationSchema: schema,
+});
+
+const { value: email } = useField("email");
+const { value: password } = useField("password");
+
+if (errors?.value && errors.value.length > 0) {
+  toast.error(errors[0]);
+}
+
+const loginUser = handleSubmit(async (values) => {
+  await useAsyncData("login", () => store.login(values));
+  // resetForm();
+});
 </script>

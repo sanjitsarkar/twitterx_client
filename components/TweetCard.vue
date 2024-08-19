@@ -24,6 +24,20 @@
 </template>
 
 <script setup>
-const props = defineProps(["tweet"]);
-const { user, content, created_at } = toRefs(props.tweet);
+const { tweet } = defineProps({
+  tweet: {
+    type: {
+      user: {
+        id: String,
+        firstName: String,
+        lastName: String,
+      },
+      content: String,
+      created_at: String,
+    },
+    required: true,
+  },
+});
+
+const { user, content, created_at } = tweet;
 </script>
