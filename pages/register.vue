@@ -24,6 +24,7 @@
               name="firstName"
               type="text"
               v-model="firstName"
+              required="true"
               class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
@@ -41,6 +42,7 @@
               name="lastName"
               type="text"
               v-model="lastName"
+              required="true"
               class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
@@ -58,6 +60,7 @@
               name="email"
               type="email"
               v-model="email"
+              required="true"
               class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
@@ -77,6 +80,7 @@
               name="password"
               type="password"
               v-model="password"
+              required="true"
               class="block w-full px-2 py-1.5 rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
@@ -96,6 +100,7 @@
               name="confirmPassword"
               type="password"
               v-model="confirmPassword"
+              required="true"
               class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
@@ -144,7 +149,7 @@ const schema = yup.object({
     .required("Email is required"),
   password: yup
     .string()
-    .min(6, "Password must be at least 6 characters long")
+    .min(5, "Password must be at least 5 characters long")
     .required("Password is required"),
   confirmPassword: yup
     .string()
@@ -162,12 +167,17 @@ const { value: email } = useField("email");
 const { value: password } = useField("password");
 const { value: confirmPassword } = useField("confirmPassword");
 
-if (errors.value && errors.value.length > 0) {
-  toast.error(errors[0]);
-}
+const registerUser = function () {
+  if (errors.value && Object.keys(errors.value).length > 0) {
+    const errorMessages = Object.values(errors.value).join("\n");
+    toast.error(errorMessages);
+    return;
+  }
 
-const registerUser = handleSubmit(async (values) => {
-  await store.registerUser(values);
-  resetForm();
-});
+  handleSubmit(async (values) => {
+    const { confirmPassword, ...user } = values;
+    await store.register(user);
+    resetForm();
+  })();
+};
 </script>

@@ -90,7 +90,7 @@ const schema = yup.object({
   email: yup.string().required("Email is required"),
   password: yup
     .string()
-    .min(5, "Password must be at least 6 characters long")
+    .min(5, "Password must be at least 5 characters long")
     .required("Password is required"),
 });
 
@@ -101,12 +101,16 @@ const { handleSubmit, errors, resetForm } = useForm({
 const { value: email } = useField("email");
 const { value: password } = useField("password");
 
-if (errors?.value && errors.value.length > 0) {
-  toast.error(errors[0]);
-}
+const loginUser = function () {
+  if (errors.value && Object.keys(errors.value).length > 0) {
+    const errorMessages = Object.values(errors.value).join("\n");
+    toast.error(errorMessages);
+    return;
+  }
 
-const loginUser = handleSubmit(async (values) => {
-  await store.login(values);
-  resetForm();
-});
+  handleSubmit(async (values) => {
+    await store.login(values);
+    resetForm();
+  })();
+};
 </script>
