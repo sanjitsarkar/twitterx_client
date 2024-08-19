@@ -167,7 +167,7 @@ if (errors.value && errors.value.length > 0) {
 }
 
 const registerUser = handleSubmit(async (values) => {
-  await useAsyncData("register", () => store.registerUser(values));
+  await store.registerUser(values);
   resetForm();
 });
 </script>

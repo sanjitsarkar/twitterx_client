@@ -4,5 +4,8 @@ export default () => ({
   error: null,
   followers: [],
   following: [],
-  searchFilter: null,
+  searchFilter: {
+    sortOrder: 'latest',
+    searchKey: ''
+  },
 })

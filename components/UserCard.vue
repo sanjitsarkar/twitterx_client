@@ -27,12 +27,10 @@
 
 <script setup>
 import { useFollowStore } from "~/stores/follow";
-import { useUserStore } from "~/stores/user";
 
 const followStore = useFollowStore();
-const userStore = useUserStore();
 
-const { user } = defineProps({
+const props = defineProps({
   user: {
     type: {
       firstName: String,
@@ -46,18 +44,22 @@ const { user } = defineProps({
   },
 });
 
-const { id, firstName, lastName, created_at, isFollower, isFollowing } = user;
+const id = computed(() => props.user.id);
+const firstName = computed(() => props.user.firstName);
+const lastName = computed(() => props.user.lastName);
+const isFollower = computed(() => props.user.isFollower);
+const isFollowing = computed(() => props.user.isFollowing);
+const created_at = computed(() => props.user.created_at);
 
 const postedAgo = computed(() => {
-  return datePostedAgo(new Date(created_at));
+  return datePostedAgo(new Date(created_at.value));
 });
 
 const handleFollow = async () => {
-  if (isFollower) {
-    await followStore.unfollowUser(id);
+  if (isFollower.value) {
+    await followStore.unfollowUser(id.value);
   } else {
-    await followStore.followUser(id);
+    await followStore.followUser(id.value);
   }
-  await userStore.fetchUsers();
 };
 </script>

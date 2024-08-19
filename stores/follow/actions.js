@@ -41,7 +41,6 @@ export default {
       });
 
       this.removeFollowing(userId);
-
       this.updateUserFollower({ userId, isFollower: false });
       toast.info(`You have unfollowed the user`);
     } catch (error) {

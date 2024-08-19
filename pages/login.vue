@@ -106,7 +106,7 @@ if (errors?.value && errors.value.length > 0) {
 }
 
 const loginUser = handleSubmit(async (values) => {
-  await useAsyncData("login", () => store.login(values));
-  // resetForm();
+  await store.login(values);
+  resetForm();
 });
 </script>

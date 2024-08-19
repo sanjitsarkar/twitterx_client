@@ -77,10 +77,10 @@ import { storeToRefs } from "pinia";
 const tweetStore = useTweetStore();
 const userStore = useUserStore();
 
-const { tweets, loading: loadingTweets } = storeToRefs(tweetStore);
 const { users, loading: loadingUsers } = storeToRefs(userStore);
+const { tweets, loading: loadingTweets } = storeToRefs(tweetStore);
 
-const activeTab = ref("users");
+const activeTab = ref("tweets");
 const content = ref("");
 const sortOrder = ref("latest");
 const searchKey = ref("");
@@ -105,52 +105,40 @@ const isUsersOrTweetsLoading = computed(
 const isActiveTab = (tab) => activeTab.value === tab;
 
 const fetchProfileOrTweets = async (params) => {
-  let { activeTab, searchKey, sortOrder, isMounted = true } = params;
+  let { activeTab, searchKey, sortOrder } = params;
   searchKey = searchKey.value;
   sortOrder = sortOrder.value;
   activeTab = activeTab.value;
   if (activeTab === "tweets") {
-    // if (isMounted) {
     await tweetStore.fetchTweets({ searchKey, sortOrder });
-    // } else {
-    //   await useAsyncData("fetchTweets", () =>
-    //     tweetStore.fetchTweets({ searchKey, sortOrder })
-    //   );
-    // }
   } else {
-    // if (isMounted) {
     await userStore.fetchUsers({ searchKey, sortOrder });
-    // } else {
-    //   await useAsyncData("fetchUsers", () =>
-    //     userStore.fetchUsers({ searchKey, sortOrder })
-    //   );
-    // }
   }
 };
 
-const onSearchKeyChange = (event) => {
-  fetchProfileOrTweets({ activeTab, searchKey: event.target, sortOrder });
+const onSearchKeyChange = async (event) => {
+  await fetchProfileOrTweets({ activeTab, searchKey: event.target, sortOrder });
 };
 
-const toggleSortOrder = () => {
+const toggleSortOrder = async () => {
   sortOrder.value = sortOrder.value === "latest" ? "oldest" : "latest";
-  fetchProfileOrTweets({ activeTab, searchKey, sortOrder });
+  await fetchProfileOrTweets({ activeTab, searchKey, sortOrder });
 };
 
 const searchPlaceholder = computed(() =>
   activeTab.value === "tweets" ? "Search tweets..." : "Search users..."
 );
 
-const setActiveTab = (tab) => {
+const setActiveTab = async (tab) => {
   activeTab.value = tab;
-  fetchProfileOrTweets({ activeTab, searchKey, sortOrder });
+  await fetchProfileOrTweets({ activeTab, searchKey, sortOrder });
 };
 
-const createTweet = () => {
-  tweetStore.createTweet({ content: content.value });
+const createTweet = async () => {
+  await tweetStore.createTweet({ content: content.value });
   content.value = "";
   activeTab.value = "tweets";
 };
 
-fetchProfileOrTweets({ activeTab, searchKey, sortOrder, isMounted: false });
+fetchProfileOrTweets({ activeTab, searchKey, sortOrder });
 </script>

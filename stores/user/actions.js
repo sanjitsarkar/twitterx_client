@@ -193,8 +193,8 @@ export default {
       if (user.id === userId) {
         return {
           ...user,
-          isFollowing: false,
-          followersCount: user.followersCount - 1
+          isFollower: false,
+          followersCount: user.followersCount > 0 ? (user.followersCount - 1) : 0
         }
       }
       return user;
